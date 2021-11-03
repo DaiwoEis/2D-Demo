@@ -58,7 +58,7 @@ public class EnemyAnimator : MonoBehaviour {
 	}
 
 	public void WaitForAnimationFinish(){
-		transform.parent.GetComponent<EnemyAI>().IDLE();
+		transform.parent.GetComponent<EnemyAI>().Idle();
 	}
 
 	public void PlaySFX(string name){

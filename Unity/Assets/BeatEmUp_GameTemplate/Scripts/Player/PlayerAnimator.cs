@@ -117,7 +117,7 @@ public class PlayerAnimator : MonoBehaviour {
 	//adds small force over time
 	IEnumerator AddForceCoroutine(float force) {
 		Rigidbody2D rb = transform.parent.GetComponent<Rigidbody2D> ();
-		DIRECTION dir = transform.parent.GetComponent<PlayerMovement> ().getCurrentDirection ();
+		Direction dir = transform.parent.GetComponent<PlayerMovement> ().getCurrentDirection ();
 		float speed = 2f;
 		float t = 0;
 

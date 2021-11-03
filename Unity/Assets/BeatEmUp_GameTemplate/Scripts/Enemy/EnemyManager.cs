@@ -28,16 +28,16 @@ public static class EnemyManager {
 		if(activeEnemies.Count > 0){
 			for(int i=0; i<activeEnemies.Count; i++){
 				if(i < MaxEnemyAttacking()){
-					activeEnemies[i].GetComponent<EnemyAI>().SetEnemyTactic(ENEMYTACTIC.ENGAGE);
+					activeEnemies[i].GetComponent<EnemyAI>().SetEnemyTactic(EnemyTactic.Engage);
 				} else {
-					activeEnemies[i].GetComponent<EnemyAI>().SetEnemyTactic(ENEMYTACTIC.KEEPMEDIUMDISTANCE);
+					activeEnemies[i].GetComponent<EnemyAI>().SetEnemyTactic(EnemyTactic.KeepMidDistance);
 				}
 			}
 		}
 	}
 
 	//forces all enemies to use a certain tactic
-	public static void ForceEnemyTactic(ENEMYTACTIC tactic){
+	public static void ForceEnemyTactic(EnemyTactic tactic){
 		getActiveEnemies();
 		if(activeEnemies.Count > 0){
 			for(int i=0; i<activeEnemies.Count; i++){
@@ -56,7 +56,7 @@ public static class EnemyManager {
 
 	//player has died, stop all enemy attacks
 	public static void PlayerHasDied(){
-		ForceEnemyTactic(ENEMYTACTIC.KEEPMEDIUMDISTANCE);
+		ForceEnemyTactic(EnemyTactic.KeepMidDistance);
 		enemyList.Clear();
 	}
 

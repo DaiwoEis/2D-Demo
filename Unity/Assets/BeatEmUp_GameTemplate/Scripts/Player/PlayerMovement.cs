@@ -21,7 +21,7 @@ public class PlayerMovement : MonoBehaviour {
 	public float jumpHeight = 2.5f;
 
 	public Rigidbody2D rb;
-	public DIRECTION currentDirection;
+	public Direction currentDirection;
 	public Vector2 inputDirection;
 
 	private PlayerAnimator animator;
@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		animator = GetComponentInChildren<PlayerAnimator> ();
 		playerState = GetComponent<PlayerState> ();
-		currentDirection = DIRECTION.Right;
+		currentDirection = Direction.Right;
 		isGrounded = true;
 	}
 
@@ -144,7 +144,7 @@ public class PlayerMovement : MonoBehaviour {
 				int i = Mathf.Clamp (Mathf.RoundToInt (vector.x), -1, 1); //change direction based on the current movement vector
 				if(i == 0) i = Mathf.RoundToInt(GFX.transform.localScale.x); //stay in the same direction while going up or down
 
-				currentDirection = (DIRECTION)i;
+				currentDirection = (Direction)i;
 				animator.Walk();
 
 			} else {
@@ -193,10 +193,10 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	//look towards the movement direction (up and down are ignored because we don't want to update the left/right direction when going up/down);
-	public void LookToDir(DIRECTION dir) {
-		if (dir == DIRECTION.Left)
+	public void LookToDir(Direction dir) {
+		if (dir == Direction.Left)
 			GFX.transform.localScale = new Vector3(-1,1,1);
-		else if (dir == DIRECTION.Right)
+		else if (dir == Direction.Right)
 			GFX.transform.localScale = new Vector3(1,1,1);
 	}
 
@@ -207,7 +207,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	//returns the current direction
-	public DIRECTION getCurrentDirection() {
+	public Direction getCurrentDirection() {
 		return currentDirection;
 	}
 
@@ -215,7 +215,7 @@ public class PlayerMovement : MonoBehaviour {
 	public void updateDirection() {
 		if(inputDirection.magnitude > 0){
 			int i = Mathf.Clamp (Mathf.RoundToInt (inputDirection.x), -1, 1);
-			currentDirection = (DIRECTION)i;
+			currentDirection = (Direction)i;
 			LookToDir (currentDirection);
 		}
 	}
@@ -231,7 +231,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 }
 
-public enum DIRECTION {
+public enum Direction {
 	Left = -1,
 	Right = 1,
 	Up = 2,
