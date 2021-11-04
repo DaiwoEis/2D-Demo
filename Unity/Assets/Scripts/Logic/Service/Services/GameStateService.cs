@@ -68,6 +68,11 @@ namespace Lockstep.Game {
             return GetEntities<Player>().ToArray();
         }
 
+        public Player2D[] GetPlayer2Ds()
+        {
+            return GetEntities<Player2D>().ToArray();
+        }
+
         public Spawner[] GetSpawners(){
             return GetEntities<Spawner>().ToArray(); //TODO Cache
         }

@@ -15,6 +15,8 @@ namespace Lockstep.Game {
         public static World Instance { get; private set; }
         public int Tick { get; set; }
         public PlayerInput[] PlayerInputs => _gameStateService.GetPlayers().Select(a => a.input).ToArray();
+        public PlayerInput[] PlayerInput2Ds => _gameStateService.GetPlayer2Ds().Select(a => a.input).ToArray();
+
         public static Player MyPlayer;
         public static object MyPlayerTrans => MyPlayer?.engineTransform;
         private List<BaseSystem> _systems = new List<BaseSystem>();

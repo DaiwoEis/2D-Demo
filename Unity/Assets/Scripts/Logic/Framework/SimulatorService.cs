@@ -39,7 +39,7 @@ namespace Lockstep.Game {
         public byte LocalActorId { get; private set; }
         private byte[] _allActors;
         private int _actorCount => _allActors.Length;
-        private PlayerInput[] _playerInputs => _world.PlayerInputs;
+        private PlayerInput[] _playerInputs => _world.PlayerInput2Ds;
         public bool IsRunning { get; set; }
 
         /// frame count that need predict(TODO should change according current network's delay)
