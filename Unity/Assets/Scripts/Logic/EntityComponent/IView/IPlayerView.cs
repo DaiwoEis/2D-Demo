@@ -7,8 +7,8 @@ namespace Lockstep.Game {
 
     public interface IPlayer2DView : IEntityView
     {
-        public void OnMove();
+        void OnMove();
 
-        public void LookToDir(Direction dir);
+        void LookToDir(Direction dir);
     }
 }
