@@ -57,6 +57,12 @@ namespace Lockstep.Game {
         public Player entity = new Player();
     }
     [Serializable]
+    public class Player2DConfig : EntityConfig
+    {
+        public override object Entity => entity;
+        public Player2D entity = new Player2D();
+    }
+    [Serializable]
     public class SpawnerConfig : EntityConfig {
         public override object Entity => entity;
         public Spawner entity = new Spawner();
@@ -109,6 +115,7 @@ namespace Lockstep.Game {
     [CreateAssetMenu(menuName = "GameConfig")]
     public class GameConfig : ScriptableObject {
         public List<PlayerConfig> player = new List<PlayerConfig>();
+        public List<Player2DConfig> player2D = new List<Player2DConfig>();
         public List<EnemyConfig> enemies = new List<EnemyConfig>();
         public List<SpawnerConfig> spawner = new List<SpawnerConfig>();
         public List<AnimatorConfig> animators = new List<AnimatorConfig>();
@@ -128,6 +135,7 @@ namespace Lockstep.Game {
 
         public EntityConfig GetEnemyConfig(int id){return  GetConfig(enemies, id);}
         public EntityConfig GetPlayerConfig(int id){return  GetConfig(player, id);}
+        public EntityConfig GetPlayer2DConfig(int id){return  GetConfig(player2D, id); }
         public EntityConfig GetSpawnerConfig(int id){return  GetConfig(spawner, id);}
 
      

@@ -16,12 +16,12 @@ namespace Lockstep.Game {
         }
 
         public EntityConfig GetEntityConfig(int id){
-            if (id >= 100) {
+            if (id >= 1000)
+                return _config.GetPlayer2DConfig(id - 1000);
+            if (id >= 100) 
                 return _config.GetSpawnerConfig(id - 100);
-            }
-            if (id >= 10) {
+            if (id >= 10)
                 return _config.GetEnemyConfig(id - 10);
-            }
             return _config.GetPlayerConfig(id);
         }
 

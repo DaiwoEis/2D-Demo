@@ -39,7 +39,8 @@ namespace Lockstep.Game {
         public byte LocalActorId { get; private set; }
         private byte[] _allActors;
         private int _actorCount => _allActors.Length;
-        private PlayerInput[] _playerInputs => _world.PlayerInput2Ds;
+        private PlayerInput[] _playerInputs => _world.PlayerInputs;
+        private PlayerInput[] _playerInput2Ds => _world.PlayerInput2Ds;
         public bool IsRunning { get; set; }
 
         /// frame count that need predict(TODO should change according current network's delay)
@@ -453,24 +454,35 @@ namespace Lockstep.Game {
             inputs[LocalActorId] = myInput;
         }
 
-        private void ProcessInputQueue(ServerFrame frame){
+        private void ProcessInputQueue(ServerFrame frame)
+        {
+            ProcessInputQueue(frame, _playerInputs);
+            ProcessInputQueue(frame, _playerInput2Ds);
+        }
+
+        private void ProcessInputQueue(ServerFrame frame, PlayerInput[] playerInputs)
+        {
             var inputs = frame.Inputs;
-            foreach (var playerInput in _playerInputs) {
+            foreach (var playerInput in playerInputs)
+            {
                 playerInput.Reset();
             }
 
-            foreach (var input in inputs) {
+            foreach (var input in inputs)
+            {
                 if (input.Commands == null) continue;
-                if (input.ActorId >= _playerInputs.Length) continue;
-                var inputEntity = _playerInputs[input.ActorId];
-                foreach (var command in input.Commands) {
+                if (input.ActorId >= playerInputs.Length) continue;
+                var inputEntity = playerInputs[input.ActorId];
+                foreach (var command in input.Commands)
+                {
                     Logger.Trace(this, input.ActorId + " >> " + input.Tick + ": " + input.Commands.Count());
                     _inputService.Execute(command, inputEntity);
                 }
             }
         }
 
-        void OnPursuingFrame(){
+        void OnPursuingFrame()
+        {
             _constStateService.IsPursueFrame = true;
             Debug.Log($"PurchaseServering curTick:" + _world.Tick);
             var progress = _world.Tick * 1.0f / _cmdBuffer.CurTickInServer;

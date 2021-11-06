@@ -18,11 +18,6 @@ namespace Lockstep.Game {
         private Dictionary<int, Serializer> _tick2Backup = new Dictionary<int, Serializer>();
 
         private void AddEntity<T>(T e) where T : BaseEntity{
-            if (typeof(T) == typeof(Player)) {
-                int i = 0;
-                Debug.Log("Add Player");
-            }
-
             var t = e.GetType();
             if (_type2Entities.TryGetValue(t, out var lstObj)) {
                 var lst = lstObj as List<T>;

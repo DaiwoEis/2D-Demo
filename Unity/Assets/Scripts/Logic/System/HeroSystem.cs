@@ -14,6 +14,10 @@ namespace Lockstep.Game{
             foreach (var player in _gameStateService.GetPlayers()) {
                 player.DoUpdate(deltaTime);
             }
+            foreach (var player in _gameStateService.GetPlayer2Ds())
+            {
+                player.DoUpdate(deltaTime);
+            }
         }
     }
 }

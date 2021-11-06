@@ -429,6 +429,84 @@ namespace Lockstep.Game{
 }                                                              
 
 namespace Lockstep.Game{                                                                                               
+    public partial class Player2D :IBackup{                                                                  
+       public void WriteBackup(Serializer writer){                                           
+			writer.Write(EntityId);
+			writer.Write(PrefabId);
+			writer.Write(inputDirection);
+			writer.Write(isDead);
+			writer.Write(isGrounded);
+			writer.Write(jumpHeight);
+			writer.Write(jumpTime);
+			writer.Write(localId);
+			writer.Write(screenEdgeHorizontal);
+			writer.Write(screenEdgeVertical);
+			writer.Write(walkSpeed);
+			writer.Write((int)(currentDirection));
+			writer.Write((int)(currentState));
+			input.WriteBackup(writer);
+			transform.WriteBackup(writer);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public void ReadBackup(Deserializer reader){                                       
+			EntityId = reader.ReadInt32();
+			PrefabId = reader.ReadInt32();
+			inputDirection = reader.ReadLVector2();
+			isDead = reader.ReadBoolean();
+			isGrounded = reader.ReadBoolean();
+			jumpHeight = reader.ReadLFloat();
+			jumpTime = reader.ReadLFloat();
+			localId = reader.ReadInt32();
+			screenEdgeHorizontal = reader.ReadLFloat();
+			screenEdgeVertical = reader.ReadLFloat();
+			walkSpeed = reader.ReadLFloat();
+			currentDirection = (Direction)reader.ReadInt32();
+			currentState = (PLAYERSTATE)reader.ReadInt32();
+			input.ReadBackup(reader);
+			transform.ReadBackup(reader);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public int GetHash(ref int idx){                                      
+           int hash = 1;                                                                             
+			hash += EntityId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += PrefabId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += inputDirection.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += isDead.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += isGrounded.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += jumpHeight.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += jumpTime.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += localId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += screenEdgeHorizontal.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += screenEdgeVertical.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += walkSpeed.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += ((int)currentDirection) * PrimerLUT.GetPrimer(idx++);
+			hash += ((int)currentState) * PrimerLUT.GetPrimer(idx++);
+			hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
+           return hash;                                                                                    
+       }                                                                                            
+                                                                                                    
+       public void DumpStr(StringBuilder sb,string prefix){                                       
+			sb.AppendLine(prefix + "EntityId"+":" + EntityId.ToString());
+			sb.AppendLine(prefix + "PrefabId"+":" + PrefabId.ToString());
+			sb.AppendLine(prefix + "inputDirection"+":" + inputDirection.ToString());
+			sb.AppendLine(prefix + "isDead"+":" + isDead.ToString());
+			sb.AppendLine(prefix + "isGrounded"+":" + isGrounded.ToString());
+			sb.AppendLine(prefix + "jumpHeight"+":" + jumpHeight.ToString());
+			sb.AppendLine(prefix + "jumpTime"+":" + jumpTime.ToString());
+			sb.AppendLine(prefix + "localId"+":" + localId.ToString());
+			sb.AppendLine(prefix + "screenEdgeHorizontal"+":" + screenEdgeHorizontal.ToString());
+			sb.AppendLine(prefix + "screenEdgeVertical"+":" + screenEdgeVertical.ToString());
+			sb.AppendLine(prefix + "walkSpeed"+":" + walkSpeed.ToString());
+			sb.AppendLine(prefix + "currentDirection"+":" + currentDirection.ToString());
+			sb.AppendLine(prefix + "currentState"+":" + currentState.ToString());
+			sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
+			sb.AppendLine(prefix + "transform" +":");  transform.DumpStr(sb,"\t" + prefix);                                                                                     
+       }                                                                                            
+    }                                                               
+}                                                              
+
+namespace Lockstep.Game{                                                                                               
     public partial class PlayerInput :IBackup{                                                                  
        public void WriteBackup(Serializer writer){                                           
 			writer.Write(defend);

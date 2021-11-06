@@ -6,13 +6,14 @@ using UnityEngine;
 namespace Lockstep.Game
 {
     [Serializable]
-    public class Player2D : Entity
+    public partial class Player2D : BaseEntity
     {
+		public int localId;
 		public PlayerInput input = new PlayerInput();
 
 		public LFloat walkSpeed = new LFloat(true, 1f);
-		public float jumpTime = new LFloat(true, 9f);
-		public float jumpHeight = new LFloat(true, 2.5f);
+		public LFloat jumpTime = new LFloat(true, 9f);
+		public LFloat jumpHeight = new LFloat(true, 2.5f);
 
 		public Direction currentDirection = Direction.Right;
 		public LVector2 inputDirection;
@@ -53,7 +54,7 @@ namespace Lockstep.Game
 
 			if (MovementStates.Contains(currentState) && !isDead)
 			{
-				var dir = new LVector2(true, inputDirection.x, inputDirection.y * new LFloat(true, 0.7f));
+				var dir = new LVector2(inputDirection.x, inputDirection.y * new LFloat(true, 0.7f));
 				Move(dir * walkSpeed * deltaTime);
 			}
 			else

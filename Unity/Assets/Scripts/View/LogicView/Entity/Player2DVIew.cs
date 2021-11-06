@@ -1,20 +1,21 @@
-﻿using UnityEngine;
+﻿using Lockstep.Math;
+using UnityEngine;
 
 namespace Lockstep.Game
 {
-    public class Player2DVIew : EntityView, IPlayer2DView
+    public class Player2DView : MonoBehaviour, IEntityView, IPlayer2DView
     {
+        [Header("Entity")]
         public Player2D Player;
 
+        [Header("表现配置")]
         public SpriteRenderer GFX;
         public SpriteRenderer Shadow;
 
         private AudioPlayer audioPlayer;
 
-
-        public override void BindEntity(BaseEntity e, BaseEntity oldEntity = null)
+        public void BindEntity(BaseEntity e, BaseEntity oldEntity = null)
         {
-            base.BindEntity(e, oldEntity);
             Player = e as Player2D;
             Player.view = this;
         }
@@ -26,6 +27,8 @@ namespace Lockstep.Game
 
         private void Update()
         {
+            var pos = Player.transform.Pos3.ToVector3();
+            transform.position = Vector3.Lerp(transform.position, pos, 0.3f);
             UpdateSortingOrder();
         }
 
@@ -41,6 +44,21 @@ namespace Lockstep.Game
                 GFX.transform.localScale = new Vector3(-1, 1, 1);
             else if (dir == Direction.Right)
                 GFX.transform.localScale = new Vector3(1, 1, 1);
+        }
+
+        public void OnTakeDamage(int amount, LVector3 hitPoint)
+        {
+            
+        }
+
+        public void OnDead()
+        {
+            
+        }
+
+        public void OnRollbackDestroy()
+        {
+            
         }
     }
 }

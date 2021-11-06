@@ -80,6 +80,8 @@ namespace Lockstep.Game {
                 var initPos = LVector2.zero; //TODO
                 var player = _gameStateService.CreateEntity<Player>(PrefabId, initPos);
                 player.localId = i;
+                var player2D = _gameStateService.CreateEntity<Player2D>(1000, initPos);
+                player2D.localId = i;
             }
 
             var allPlayers = _gameStateService.GetPlayers();
