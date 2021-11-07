@@ -113,6 +113,7 @@ namespace Lockstep.Game {
             Serializer writer = new Serializer();
             writer.Write(_commonStateService.Hash); //hash
             BackUpEntities(GetPlayers(), writer);
+            BackUpEntities(GetPlayer2Ds(), writer);
             BackUpEntities(GetEnemies(), writer);
             BackUpEntities(GetSpawners(), writer);
             _tick2Backup[tick] = writer;
@@ -133,6 +134,7 @@ namespace Lockstep.Game {
 
                 //. Recover Entities
                 RecoverEntities(new List<Player>(), reader);
+                RecoverEntities(new List<Player2D>(), reader);
                 RecoverEntities(new List<Enemy>(), reader);
                 RecoverEntities(new List<Spawner>(), reader);
 

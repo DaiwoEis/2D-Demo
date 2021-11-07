@@ -18,13 +18,13 @@ namespace Lockstep.Game {
         private string dumpPath => Path.Combine(UnityEngine.Application.dataPath, _serviceContainer.GetService<IGameConfigService>().DumpStrPath);
 #endif
 #if UNITY_STANDALONE_WIN
-        private string dumpAllPath => "c:/temp/Tutorial/LockstepTutorial/DumpLog";
+        private string dumpAllPath => "c:/temp/2D-Demo/DumpLog";
 #else
-        private string dumpAllPath => "/tmp/Tutorial/LockstepTutorial/DumpLog";
+        private string dumpAllPath => "/temp/2D-Demo//DumpLog";
 #endif  
         private HashHelper _hashHelper;
         private StringBuilder _curSb;
-        public bool enable = false;
+        public bool enable = true;
         public void DumpFrame(bool isNewFrame){
             if(!enable) return;
             _curSb = DumpFrame();

@@ -10,5 +10,9 @@ namespace Lockstep.Game {
         void OnMove();
 
         void LookToDir(Direction dir);
+
+        void IdleAnim();
+
+        void WalkAnim();
     }
 }

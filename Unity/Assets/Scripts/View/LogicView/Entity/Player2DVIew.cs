@@ -11,6 +11,7 @@ namespace Lockstep.Game
         [Header("表现配置")]
         public SpriteRenderer GFX;
         public SpriteRenderer Shadow;
+        public Animator animator;
 
         private AudioPlayer audioPlayer;
 
@@ -59,6 +60,17 @@ namespace Lockstep.Game
         public void OnRollbackDestroy()
         {
             
+        }
+
+        public void IdleAnim()
+        {
+            animator.SetTrigger("Idle");
+            animator.SetBool("Walk", false);
+        }
+
+        public void WalkAnim()
+        {
+            animator.SetBool("Walk", true);
         }
     }
 }

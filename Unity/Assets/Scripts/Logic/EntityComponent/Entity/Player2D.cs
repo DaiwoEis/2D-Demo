@@ -11,16 +11,16 @@ namespace Lockstep.Game
 		public int localId;
 		public PlayerInput input = new PlayerInput();
 
-		public LFloat walkSpeed = new LFloat(true, 1f);
-		public LFloat jumpTime = new LFloat(true, 9f);
-		public LFloat jumpHeight = new LFloat(true, 2.5f);
+		public LFloat walkSpeed = new LFloat(true, 1000);
+		public LFloat jumpTime = new LFloat(true, 9000);
+		public LFloat jumpHeight = new LFloat(true, 2500);
 
 		public Direction currentDirection = Direction.Right;
 		public LVector2 inputDirection;
 
 		[Backup] private bool isDead = false;
-		[Backup] private LFloat screenEdgeHorizontal = new LFloat(true, 80f);
-		[Backup] private LFloat screenEdgeVertical = new LFloat(true, 18f);
+		[Backup] private LFloat screenEdgeHorizontal = new LFloat(true, 80000);
+		[Backup] private LFloat screenEdgeVertical = new LFloat(true, 18000);
 		[Backup] private bool isGrounded;
 
 		private List<PLAYERSTATE> MovementStates = new List<PLAYERSTATE> {
@@ -54,7 +54,7 @@ namespace Lockstep.Game
 
 			if (MovementStates.Contains(currentState) && !isDead)
 			{
-				var dir = new LVector2(inputDirection.x, inputDirection.y * new LFloat(true, 0.7f));
+				var dir = new LVector2(inputDirection.x, inputDirection.y * new LFloat(true, 700));
 				Move(dir * walkSpeed * deltaTime);
 			}
 			else
@@ -114,7 +114,8 @@ namespace Lockstep.Game
 		{
 			if (currentState != PLAYERSTATE.JUMPING && currentState != PLAYERSTATE.JUMPKICK)
 			{
-				transform.pos += vector;
+				transform.pos.x += vector.x;
+				transform.y += vector.y;
 
 				if (inputDirection.magnitude > 0)
 				{
@@ -212,12 +213,12 @@ namespace Lockstep.Game
 
 		private void IdleAnim()
         {
-
+			view?.IdleAnim();
         }
 
 		private void WalkAnim()
         {
-
-        }
+			view?.WalkAnim();
+		}
 	}
 }
