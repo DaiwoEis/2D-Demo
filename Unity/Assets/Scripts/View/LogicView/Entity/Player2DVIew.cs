@@ -28,7 +28,7 @@ namespace Lockstep.Game
 
         private void Update()
         {
-            var pos = Player.transform.Pos3.ToVector3();
+            var pos = new Vector3(Player.transform.pos.x.ToFloat(), Player.transform.pos.y.ToFloat() + Player.transform.y.ToFloat());
             transform.position = Vector3.Lerp(transform.position, pos, 0.3f);
             UpdateSortingOrder();
         }
@@ -64,13 +64,27 @@ namespace Lockstep.Game
 
         public void IdleAnim()
         {
-            animator.SetTrigger("Idle");
-            animator.SetBool("Walk", false);
+            animator.Play("Idle");
         }
 
-        public void WalkAnim()
+        public void WalkAnim(bool walk)
         {
-            animator.SetBool("Walk", true);
+            animator.SetBool("Walk", walk);
+        }
+
+        public void ShowDustEffect()
+        {
+            Instantiate(Resources.Load("SmokePuffEffect"), transform.position, Quaternion.identity);
+        }
+
+        public void JumpAnim()
+        {
+            animator.Play("Jump 1");
+        }
+
+        public void OnGround()
+        {
+            animator.Play("Idle");
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Lockstep.Math;
 using UnityEngine;
 
@@ -23,14 +22,10 @@ namespace Lockstep.Game
 		[Backup] private LFloat screenEdgeVertical = new LFloat(true, 18000);
 		[Backup] private bool isGrounded;
 
-		private List<PLAYERSTATE> MovementStates = new List<PLAYERSTATE> {
-			PLAYERSTATE.IDLE,
-			PLAYERSTATE.JUMPING,
-			PLAYERSTATE.JUMPKICK,
-			PLAYERSTATE.MOVING
-		};
-
 		public PLAYERSTATE currentState = PLAYERSTATE.IDLE;
+
+		[Backup] private bool jumping;
+		[Backup] private LFloat jumpTimer;
 
 		[ReRefBackup] public IPlayer2DView view;
 
@@ -41,9 +36,12 @@ namespace Lockstep.Game
 			view = null;
         }
 
-        public void SetState(PLAYERSTATE state)
+        public void SetState(PLAYERSTATE state, LFloat deltaTime)
 		{
+			OnStateExit(currentState);
 			currentState = state;
+			OnStateEnter(currentState);
+			OnStateUpdate(currentState, deltaTime);
 		}
 
         public override void DoUpdate(LFloat deltaTime)
@@ -51,86 +49,94 @@ namespace Lockstep.Game
             base.DoUpdate(deltaTime);
 
 			inputDirection = input.inputUV;
+			OnStateUpdate(currentState, deltaTime);
+		}
 
-			if (MovementStates.Contains(currentState) && !isDead)
-			{
-				var dir = new LVector2(inputDirection.x, inputDirection.y * new LFloat(true, 700));
-				Move(dir * walkSpeed * deltaTime);
+		private void OnStateEnter(PLAYERSTATE state)
+        {
+			if (state == PLAYERSTATE.IDLE)
+				IdleAnim();
+
+			if (state == PLAYERSTATE.JUMPING)
+            {
+				jumping = true;
+				jumpTimer = LFloat.zero;
+				isGrounded = false;
+				JumpAnim();
 			}
-			else
-			{
-				Move(LVector2.zero);
+        }
+
+		private void OnStateExit(PLAYERSTATE state)
+		{
+			if (state == PLAYERSTATE.JUMPING)
+            {
+				transform.y = 0;
+				ShowDustEffect();
+				isGrounded = true;
+				view?.OnGround();
+			}
+			if (state == PLAYERSTATE.MOVING)
+				view?.WalkAnim(false);
+		}
+
+		private void OnStateUpdate(PLAYERSTATE state, LFloat deltaTime)
+		{
+			if (currentState == PLAYERSTATE.IDLE)
+            {
+				if (input.jump)
+					SetState(PLAYERSTATE.JUMPING, deltaTime);
+				else if (inputDirection.magnitude > 0)
+					SetState(PLAYERSTATE.MOVING, deltaTime);
 			}
 
-			if (input.jump && MovementStates.Contains(currentState) && !isDead)
+			if (currentState == PLAYERSTATE.MOVING)
 			{
-				inputDirection.y = 0;
-				Move(inputDirection * walkSpeed * deltaTime);
+				Move(deltaTime);
+				view?.WalkAnim(true);
 
-				//if (currentState != PLAYERSTATE.JUMPING) 
-				//	StartCoroutine(doJump());
+				if (input.jump)
+					SetState(PLAYERSTATE.JUMPING, deltaTime);
+				else if (inputDirection.magnitude == 0)
+					SetState(PLAYERSTATE.IDLE, deltaTime);
+			}
+
+			if (currentState == PLAYERSTATE.JUMPING)
+			{
+				Move(deltaTime);
+				DoJump(deltaTime);
+
+				if (jumpTimer < LFloat.zero)
+					SetState(PLAYERSTATE.IDLE, deltaTime);
 			}
 		}
 
-
-		//jump sequence
-		//IEnumerator doJump()
-		//{
-		//	float t = 0;
-		//	Vector3 startPos = GFX.transform.localPosition;
-		//	Vector3 endPos = new Vector3(startPos.x, startPos.y + jumpHeight, startPos.z);
-
-		//	playerState.SetState(PLAYERSTATE.JUMPING);
-		//	isGrounded = false;
-		//	animator.Jump();
-
-		//	//adjust the jump animation speed so it fits with the height and time parameters
-		//	GFX.GetComponent<Animator>().SetFloat("AnimationSpeed", 1f / jumpTime);
-
-		//	//going up
-		//	while (t < 1)
-		//	{
-		//		GFX.transform.localPosition = Vector3.Lerp(startPos, endPos, MathUtilities.Sinerp(0, 1, t));
-		//		t += Time.deltaTime / (jumpTime / 2);
-		//		yield return null;
-		//	}
-
-		//	//going down
-		//	while (t > 0)
-		//	{
-		//		GFX.transform.localPosition = Vector3.Lerp(startPos, endPos, MathUtilities.Sinerp(0, 1, t));
-		//		t -= Time.deltaTime / (jumpTime / 2);
-		//		yield return null;
-		//	}
-
-		//	GFX.transform.localPosition = startPos;
-
-		//	//show dust particles
-		//	animator.ShowDustEffect();
-		//	isGrounded = true;
-		//}
-
-		private void Move(LVector2 vector)
-		{
-			if (currentState != PLAYERSTATE.JUMPING && currentState != PLAYERSTATE.JUMPKICK)
-			{
-				transform.pos.x += vector.x;
-				transform.y += vector.y;
-
-				if (inputDirection.magnitude > 0)
-				{
-					UpdateDirection();
-					WalkAnim();
-				}
-				else
-				{
-					IdleAnim();
-				}
-
-				LookToDir(currentDirection);
-				isGrounded = true;
-				view?.OnMove();
+        private void DoJump(LFloat deltaTime)
+        {
+			if (jumping)
+            {
+				jumpTimer += deltaTime;
+				transform.y = LMath.Lerp(LFloat.zero, jumpHeight, LMath.SinLerp(LFloat.zero, LFloat.one, jumpTimer));
+				if (jumpTimer > jumpTime / 2)
+					jumping = false;
 			}
+			else
+            {
+				jumpTimer -= deltaTime;
+				transform.y = LMath.Lerp(LFloat.zero, jumpHeight, LMath.SinLerp(LFloat.zero, LFloat.one, jumpTimer));
+			}
+        }
+
+        private void Move(LFloat deltaTime)
+		{
+			LVector2 vector = new LVector2(inputDirection.x, inputDirection.y * new LFloat(true, 700)) * walkSpeed * deltaTime;
+			transform.pos.x += vector.x;
+			transform.pos.y += vector.y;
+
+			if (inputDirection.magnitude > 0)
+				UpdateDirection();
+			LookToDir(currentDirection);
+
+			view?.OnMove();
 			//KeepPlayerInCameraView();
 		}
 
@@ -174,16 +180,6 @@ namespace Lockstep.Game
 		//	}
 		//}
 
-		public void Idle()
-		{
-			if (currentState != PLAYERSTATE.JUMPING)
-			{
-				SetState(PLAYERSTATE.IDLE);
-				transform.pos = LVector2.zero;
-				IdleAnim();
-			}
-		}
-
 		public void LookToDir(Direction dir)
 		{
 			view?.LookToDir(dir);
@@ -198,7 +194,6 @@ namespace Lockstep.Game
 		{
 			int i = Mathf.Clamp(Mathf.RoundToInt(inputDirection.x.ToFloat()), -1, 1);
 			currentDirection = (Direction)i;
-			LookToDir(currentDirection);
 		}
 
 		public void Death()
@@ -216,9 +211,14 @@ namespace Lockstep.Game
 			view?.IdleAnim();
         }
 
-		private void WalkAnim()
+		private void ShowDustEffect()
         {
-			view?.WalkAnim();
-		}
+			view?.ShowDustEffect();
+        }
+
+		private void JumpAnim()
+        {
+			view?.JumpAnim();
+        }
 	}
 }

@@ -13,6 +13,12 @@ namespace Lockstep.Game {
 
         void IdleAnim();
 
-        void WalkAnim();
+        void WalkAnim(bool walk);
+
+        void ShowDustEffect();
+
+        void JumpAnim();
+
+        void OnGround();
     }
 }

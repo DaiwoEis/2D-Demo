@@ -480,5 +480,21 @@ namespace Lockstep.Math
             return new LFloat(true,((long) u._x * v._x + (long) u._y * v._y) / LFloat.Precision);
         }
 
+        public static LFloat SinLerp(LFloat start, LFloat end, LFloat value)
+        {
+            return Lerp(start, end, Sin(value * PI * LFloat.half));
+        }
+
+        //curve calculation for ease in effect
+        public static LFloat CosLerp(LFloat start, LFloat end, LFloat value)
+        {
+            return Lerp(start, end, LFloat.one - Cos(value * PI * LFloat.half));
+        }
+
+        //curve calculation for easing at start + end
+        public static LFloat CosSinLerp(LFloat start, LFloat end, LFloat value)
+        {
+            return Lerp(start, end, value * value * (3 * LFloat.one - 2 * value));
+        }
     }
 }
