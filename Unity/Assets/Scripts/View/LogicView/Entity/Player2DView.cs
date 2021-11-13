@@ -67,9 +67,9 @@ namespace Lockstep.Game
             animator.Play("Idle");
         }
 
-        public void WalkAnim(bool walk)
+        public void WalkAnim()
         {
-            animator.SetBool("Walk", walk);
+            animator.Play("Walk");
         }
 
         public void ShowDustEffect()
@@ -79,12 +79,17 @@ namespace Lockstep.Game
 
         public void JumpAnim()
         {
-            animator.Play("Jump 1");
+            animator.Play("Jump");
         }
 
         public void OnGround()
         {
             animator.Play("Idle");
+        }
+
+        public void JumpKickAnim()
+        {
+            animator.Play("JumpKick");
         }
     }
 }

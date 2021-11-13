@@ -26,6 +26,7 @@ namespace Lockstep.Game
 
 		[Backup] private bool jumping;
 		[Backup] private LFloat jumpTimer;
+		[Backup] private bool jumpKick;
 
 		[ReRefBackup] public IPlayer2DView view;
 
@@ -48,6 +49,13 @@ namespace Lockstep.Game
         {
             base.DoUpdate(deltaTime);
 
+			if (input.punch)
+				Debug.LogError("punch");
+			if (input.jump)
+				Debug.LogError("jump");
+			if (input.kick)
+				Debug.LogError("kick");
+
 			inputDirection = input.inputUV;
 			OnStateUpdate(currentState, deltaTime);
 		}
@@ -62,9 +70,13 @@ namespace Lockstep.Game
 				jumping = true;
 				jumpTimer = LFloat.zero;
 				isGrounded = false;
+				jumpKick = false;
 				JumpAnim();
 			}
-        }
+
+			if (state == PLAYERSTATE.MOVING)
+				view?.WalkAnim();
+		}
 
 		private void OnStateExit(PLAYERSTATE state)
 		{
@@ -75,8 +87,6 @@ namespace Lockstep.Game
 				isGrounded = true;
 				view?.OnGround();
 			}
-			if (state == PLAYERSTATE.MOVING)
-				view?.WalkAnim(false);
 		}
 
 		private void OnStateUpdate(PLAYERSTATE state, LFloat deltaTime)
@@ -92,7 +102,7 @@ namespace Lockstep.Game
 			if (currentState == PLAYERSTATE.MOVING)
 			{
 				Move(deltaTime);
-				view?.WalkAnim(true);
+				view?.WalkAnim();
 
 				if (input.jump)
 					SetState(PLAYERSTATE.JUMPING, deltaTime);
@@ -104,11 +114,22 @@ namespace Lockstep.Game
 			{
 				Move(deltaTime);
 				DoJump(deltaTime);
+				CheckJumpKick();
 
 				if (jumpTimer < LFloat.zero)
 					SetState(PLAYERSTATE.IDLE, deltaTime);
+
 			}
 		}
+
+		private void CheckJumpKick()
+        {
+			if (!jumpKick && (input.kick || input.punch))
+            {
+				jumpKick = true;
+				view?.JumpKickAnim();
+            }
+        }
 
         private void DoJump(LFloat deltaTime)
         {
