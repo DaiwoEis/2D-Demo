@@ -29,12 +29,11 @@ namespace Lockstep.Game {
             if (CurGameInput.Equals(PlayerInput.Empty)) {
                 return null;
             }
-
-            return new List<InputCmd>() {
-                new InputCmd() {
-                    content = CurGameInput.ToBytes()
-                }
+            var ret = new List<InputCmd>() {
+                new InputCmd() { content = CurGameInput.ToBytes() }
             };
+            CurGameInput.Reset();
+            return ret;
         }
 
         public List<InputCmd> GetDebugInputCmds(){

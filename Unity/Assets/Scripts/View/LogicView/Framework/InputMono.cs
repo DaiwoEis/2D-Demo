@@ -70,17 +70,20 @@ namespace Lockstep.Game {
                 kick = Input.GetKeyDown(KickKey);
                 defend = Input.GetKeyDown(DefendKey);
                 jump = Input.GetKeyDown(JumpKey);
-                
+
+                var lastInput = GameInputService.CurGameInput;
+                if (lastInput == null)
+                    lastInput = new PlayerInput();
                 GameInputService.CurGameInput = new PlayerInput() {
                     mousePos = mousePos,
                     inputUV = inputUV,
-                    isInputFire = isInputFire,
+                    isInputFire = lastInput.isInputFire || isInputFire,
                     skillId = skillId,
-                    isSpeedUp = isSpeedUp,
-                    punch = punch,
-                    kick = kick,
-                    defend = defend,
-                    jump = jump
+                    isSpeedUp = lastInput.isSpeedUp || isSpeedUp,
+                    punch = lastInput.punch || punch,
+                    kick = lastInput.kick || kick,
+                    defend = lastInput.defend || defend,
+                    jump = lastInput.jump || jump
                 };
             }
         }

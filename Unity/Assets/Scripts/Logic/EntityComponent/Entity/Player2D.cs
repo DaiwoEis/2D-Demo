@@ -49,13 +49,6 @@ namespace Lockstep.Game
         {
             base.DoUpdate(deltaTime);
 
-			if (input.punch)
-				Debug.LogError("punch");
-			if (input.jump)
-				Debug.LogError("jump");
-			if (input.kick)
-				Debug.LogError("kick");
-
 			inputDirection = input.inputUV;
 			OnStateUpdate(currentState, deltaTime);
 		}
