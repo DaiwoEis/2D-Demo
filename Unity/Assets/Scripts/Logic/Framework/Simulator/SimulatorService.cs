@@ -138,6 +138,7 @@ namespace Lockstep.Game {
             while (inputTick < PreSendInputCount) {
                 SendInputs(inputTick++);
             }
+            _inputService.Reset();
         }
 
         public void Trace(string msg, bool isNewLine = false, bool isNeedLogTrace = false){
@@ -237,8 +238,13 @@ namespace Lockstep.Game {
                 DoClientUpdate();
             }
             else {
-                while (inputTick <= inputTargetTick) {
-                    SendInputs(inputTick++);
+                if (inputTick <= inputTargetTick)
+                {
+                    while (inputTick <= inputTargetTick)
+                    {
+                        SendInputs(inputTick++);
+                    }
+                    _inputService.Reset();
                 }
 
                 DoNormalUpdate();
@@ -277,19 +283,26 @@ namespace Lockstep.Game {
                 }
             }
 
-            while (_world.Tick < TargetTick) {
-                FramePredictCount = 0;
-                var input = new Msg_PlayerInput(_world.Tick, LocalActorId, _inputService.GetInputCmds());
-                var frame = new ServerFrame() {
-                    tick = _world.Tick,
-                    _inputs = new Msg_PlayerInput[] {input}
-                };
-                _cmdBuffer.PushLocalFrame(frame);
-                _cmdBuffer.PushServerFrames(new ServerFrame[] {frame});
-                Simulate(_cmdBuffer.GetFrame(_world.Tick));
-                if (_commonStateService.IsPause) {
-                    return;
+            if (_world.Tick < TargetTick)
+            {
+                while (_world.Tick < TargetTick)
+                {
+                    FramePredictCount = 0;
+                    var input = new Msg_PlayerInput(_world.Tick, LocalActorId, _inputService.FetchInputCmds());
+                    var frame = new ServerFrame()
+                    {
+                        tick = _world.Tick,
+                        _inputs = new Msg_PlayerInput[] { input }
+                    };
+                    _cmdBuffer.PushLocalFrame(frame);
+                    _cmdBuffer.PushServerFrames(new ServerFrame[] { frame });
+                    Simulate(_cmdBuffer.GetFrame(_world.Tick));
+                    if (_commonStateService.IsPause)
+                    {
+                        return;
+                    }
                 }
+                _inputService.Reset();
             }
         }
 
@@ -365,7 +378,7 @@ namespace Lockstep.Game {
         }
 
         void SendInputs(int curTick){
-            var input = new Msg_PlayerInput(curTick, LocalActorId, _inputService.GetInputCmds());
+            var input = new Msg_PlayerInput(curTick, LocalActorId, _inputService.FetchInputCmds());
             var cFrame = new ServerFrame();
             var inputs = new Msg_PlayerInput[_actorCount];
             inputs[LocalActorId] = input;

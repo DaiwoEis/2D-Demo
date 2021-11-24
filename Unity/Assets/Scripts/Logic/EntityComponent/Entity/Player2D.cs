@@ -24,6 +24,8 @@ namespace Lockstep.Game
 
 		public PLAYERSTATE currentState = PLAYERSTATE.IDLE;
 
+		[Backup] private LFloat stateTimer = LFloat.zero;
+
 		[Backup] private bool jumping;
 		[Backup] private LFloat jumpTimer;
 		[Backup] private bool jumpKick;
@@ -55,20 +57,35 @@ namespace Lockstep.Game
 
 		private void OnStateEnter(PLAYERSTATE state)
         {
+			stateTimer = LFloat.zero;
 			if (state == PLAYERSTATE.IDLE)
-				IdleAnim();
-
-			if (state == PLAYERSTATE.JUMPING)
+            {
+				view?.PlayAnim("Idle");
+			}
+			else if (state == PLAYERSTATE.JUMPING)
             {
 				jumping = true;
 				jumpTimer = LFloat.zero;
 				isGrounded = false;
 				jumpKick = false;
-				JumpAnim();
+				view?.PlayAnim("Jump");
 			}
-
-			if (state == PLAYERSTATE.MOVING)
-				view?.WalkAnim();
+			else if (state == PLAYERSTATE.PUNCH)
+            {
+				view?.PlayAnim("Punch");
+            }
+			else if (state == PLAYERSTATE.KICK)
+			{
+				view?.PlayAnim("Kick");
+			}
+			else if (state == PLAYERSTATE.DEFENDING)
+			{
+				view?.PlayAnim("Defend");
+			}
+			else if (state == PLAYERSTATE.MOVING)
+            {
+				view?.PlayAnim("Walk");
+			}
 		}
 
 		private void OnStateExit(PLAYERSTATE state)
@@ -78,32 +95,41 @@ namespace Lockstep.Game
 				transform.y = 0;
 				ShowDustEffect();
 				isGrounded = true;
-				view?.OnGround();
 			}
 		}
 
 		private void OnStateUpdate(PLAYERSTATE state, LFloat deltaTime)
 		{
+			stateTimer += deltaTime;
 			if (currentState == PLAYERSTATE.IDLE)
             {
 				if (input.jump)
 					SetState(PLAYERSTATE.JUMPING, deltaTime);
+				else if (input.punch)
+					SetState(PLAYERSTATE.PUNCH, deltaTime);
+				else if (input.kick)
+					SetState(PLAYERSTATE.KICK, deltaTime);
+				else if (input.defend)
+					SetState(PLAYERSTATE.DEFENDING, deltaTime);
 				else if (inputDirection.magnitude > 0)
 					SetState(PLAYERSTATE.MOVING, deltaTime);
 			}
-
-			if (currentState == PLAYERSTATE.MOVING)
+			else if (currentState == PLAYERSTATE.MOVING)
 			{
 				Move(deltaTime);
-				view?.WalkAnim();
 
 				if (input.jump)
 					SetState(PLAYERSTATE.JUMPING, deltaTime);
+				else if (input.punch)
+					SetState(PLAYERSTATE.PUNCH, deltaTime);
+				else if (input.kick)
+					SetState(PLAYERSTATE.KICK, deltaTime);
+				else if (input.defend)
+					SetState(PLAYERSTATE.DEFENDING, deltaTime);
 				else if (inputDirection.magnitude == 0)
 					SetState(PLAYERSTATE.IDLE, deltaTime);
 			}
-
-			if (currentState == PLAYERSTATE.JUMPING)
+			else if (currentState == PLAYERSTATE.JUMPING)
 			{
 				Move(deltaTime);
 				DoJump(deltaTime);
@@ -111,7 +137,21 @@ namespace Lockstep.Game
 
 				if (jumpTimer < LFloat.zero)
 					SetState(PLAYERSTATE.IDLE, deltaTime);
-
+			}
+			else if (currentState == PLAYERSTATE.DEFENDING)
+            {
+				if (!input.defend)
+					SetState(PLAYERSTATE.IDLE, deltaTime);
+			}
+			else if (currentState == PLAYERSTATE.PUNCH)
+			{
+				if (stateTimer >= new LFloat(true, 233))
+					SetState(PLAYERSTATE.IDLE, deltaTime);
+			}
+			else if (currentState == PLAYERSTATE.KICK)
+			{
+				if (stateTimer >= new LFloat(true, 350))
+					SetState(PLAYERSTATE.IDLE, deltaTime);
 			}
 		}
 
@@ -120,7 +160,7 @@ namespace Lockstep.Game
 			if (!jumpKick && (input.kick || input.punch))
             {
 				jumpKick = true;
-				view?.JumpKickAnim();
+				view?.PlayAnim("JumpKick");
             }
         }
 
@@ -220,19 +260,9 @@ namespace Lockstep.Game
 			return isGrounded;
 		}
 
-		private void IdleAnim()
-        {
-			view?.IdleAnim();
-        }
-
 		private void ShowDustEffect()
         {
 			view?.ShowDustEffect();
-        }
-
-		private void JumpAnim()
-        {
-			view?.JumpAnim();
         }
 	}
 }

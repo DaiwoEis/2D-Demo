@@ -25,15 +25,20 @@ namespace Lockstep.Game {
             //Debug.Log("InputUV  " + input.inputUV);
         }
 
-        public List<InputCmd> GetInputCmds(){
+        public List<InputCmd> FetchInputCmds(){
             if (CurGameInput.Equals(PlayerInput.Empty)) {
                 return null;
             }
             var ret = new List<InputCmd>() {
                 new InputCmd() { content = CurGameInput.ToBytes() }
             };
-            CurGameInput.Reset();
+            CurGameInput.Fetch();
             return ret;
+        }
+
+        public void Reset()
+        {
+            CurGameInput.Reset();
         }
 
         public List<InputCmd> GetDebugInputCmds(){

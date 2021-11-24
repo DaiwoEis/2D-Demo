@@ -14,10 +14,11 @@ public class MainScript : MonoBehaviour {
     public bool HasInit = false;
 
     private ServiceContainer _serviceContainer;
+    private InputMono inputMono;
 
     private void Awake(){
         gameObject.AddComponent<PingMono>();
-        gameObject.AddComponent<InputMono>();
+        inputMono = gameObject.AddComponent<InputMono>();
         _serviceContainer = new UnityServiceContainer();
         _serviceContainer.GetService<IConstStateService>().GameName = "ARPGDemo";
         _serviceContainer.GetService<IConstStateService>().IsClientMode = IsClientMode;
@@ -47,6 +48,7 @@ public class MainScript : MonoBehaviour {
     }
 
     private void Update(){
+        inputMono.UpdateInput();
         _serviceContainer.GetService<IConstStateService>().IsRunVideo = IsVideoMode;
         launcher.DoUpdate(Time.deltaTime);
     }

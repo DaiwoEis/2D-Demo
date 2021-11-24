@@ -62,34 +62,14 @@ namespace Lockstep.Game
             
         }
 
-        public void IdleAnim()
-        {
-            animator.Play("Idle");
-        }
-
-        public void WalkAnim()
-        {
-            animator.Play("Walk");
-        }
-
         public void ShowDustEffect()
         {
             Instantiate(Resources.Load("SmokePuffEffect"), transform.position, Quaternion.identity);
         }
 
-        public void JumpAnim()
+        public void PlayAnim(string animName)
         {
-            animator.Play("Jump");
-        }
-
-        public void OnGround()
-        {
-            animator.Play("Idle");
-        }
-
-        public void JumpKickAnim()
-        {
-            animator.Play("JumpKick");
+            animator.Play(animName);
         }
     }
 }

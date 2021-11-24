@@ -36,7 +36,7 @@ namespace Lockstep.Game {
             floorMask = LayerMask.GetMask("Floor");
         }
 
-        public void Update(){
+        public void UpdateInput(){
             if (World.Instance != null && !IsReplay) {
                 float h = Input.GetAxisRaw("Horizontal");
                 float v = Input.GetAxisRaw("Vertical");
@@ -68,7 +68,7 @@ namespace Lockstep.Game {
 
                 punch = Input.GetKeyDown(PunchKey);
                 kick = Input.GetKeyDown(KickKey);
-                defend = Input.GetKeyDown(DefendKey);
+                defend = Input.GetKey(DefendKey);
                 jump = Input.GetKeyDown(JumpKey);
 
                 var lastInput = GameInputService.CurGameInput;

@@ -39,6 +39,13 @@ namespace Lockstep.Game {
             jump = false;
         }
 
+        public void Fetch()
+        {
+            punch = false;
+            kick = false;
+            jump = false;
+        }
+
         public override void Deserialize(Deserializer reader){
             mousePos = reader.ReadLVector2();
             inputUV = reader.ReadLVector2();

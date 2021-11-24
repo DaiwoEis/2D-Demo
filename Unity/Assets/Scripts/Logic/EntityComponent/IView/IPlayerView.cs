@@ -11,16 +11,8 @@ namespace Lockstep.Game {
 
         void LookToDir(Direction dir);
 
-        void IdleAnim();
-
-        void WalkAnim();
-
         void ShowDustEffect();
 
-        void JumpAnim();
-
-        void OnGround();
-
-        void JumpKickAnim();
+        void PlayAnim(string animName);
     }
 }
