@@ -12,8 +12,7 @@ namespace Lockstep.Game
         public SpriteRenderer GFX;
         public SpriteRenderer Shadow;
         public Animator animator;
-
-        private AudioPlayer audioPlayer;
+        public AudioPlayer audioPlayer;
 
         public void BindEntity(BaseEntity e, BaseEntity oldEntity = null)
         {
@@ -24,6 +23,17 @@ namespace Lockstep.Game
         public void OnMove()
         {
 
+        }
+
+        private void Awake()
+        {
+            var go = GameObject.Find("AudioPlayer");
+            if (go == null)
+            {
+                var prefab = Resources.Load("AudioPlayer");
+                go = Instantiate(prefab) as GameObject;
+            }
+            audioPlayer = go.GetComponent<AudioPlayer>();
         }
 
         private void Update()
@@ -70,6 +80,11 @@ namespace Lockstep.Game
         public void PlayAnim(string animName)
         {
             animator.Play(animName);
+        }
+
+        public void PlaySound(string sfx)
+        {
+            audioPlayer.playSFX(sfx);
         }
     }
 }

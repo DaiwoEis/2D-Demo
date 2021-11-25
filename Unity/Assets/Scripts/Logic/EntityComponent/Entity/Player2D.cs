@@ -1,6 +1,7 @@
 ﻿using System;
 using Lockstep.Math;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Lockstep.Game
 {
@@ -30,6 +31,8 @@ namespace Lockstep.Game
 		[Backup] private LFloat jumpTimer;
 		[Backup] private bool jumpKick;
 
+		public CTimeLine timeLineCop = new CTimeLine();
+
 		[ReRefBackup] public IPlayer2DView view;
 
         protected override void BindRef()
@@ -37,7 +40,22 @@ namespace Lockstep.Game
             base.BindRef();
 
 			view = null;
-        }
+			RegisterComponent(timeLineCop);
+			timeLineCop.Clear();
+			timeLineCop.AddTimeLine(new TimeLine
+			{
+				name = "punch",
+				length = new LFloat(true, 233),
+				nodes = new List<TimeLineNode>
+                {
+					new TimeLineNode
+                    {
+						time = LFloat.zero,
+						callBack = (p) => view?.PlaySound("Whoosh")
+                    }
+                }
+			});
+		}
 
         public void SetState(PLAYERSTATE state, LFloat deltaTime)
 		{
@@ -72,6 +90,7 @@ namespace Lockstep.Game
 			}
 			else if (state == PLAYERSTATE.PUNCH)
             {
+				timeLineCop.StartTimeLine("punch");
 				view?.PlayAnim("Punch");
             }
 			else if (state == PLAYERSTATE.KICK)

@@ -14,5 +14,7 @@ namespace Lockstep.Game {
         void ShowDustEffect();
 
         void PlayAnim(string animName);
+
+        void PlaySound(string sfx);
     }
 }
