@@ -41,19 +41,42 @@ namespace Lockstep.Game
 
 			view = null;
 			RegisterComponent(timeLineCop);
+			InitTimeLineDic();
+		}
+
+		private void InitTimeLineDic()
+        {
+			var dic = new Dictionary<string, Action<object[]>>
+			{
+				{ "PlaySound", objs => view?.PlaySound(objs[0] as string) },
+			};
+			timeLineCop.SetCallBackDic(dic);
+			timeLineCop.ReBindRef();
+		}
+
+        public override void DoAwake()
+        {
+            base.DoAwake();
+
+			InitTimeLineData();
+		}
+
+		private void InitTimeLineData()
+        {
 			timeLineCop.Clear();
 			timeLineCop.AddTimeLine(new TimeLine
 			{
 				name = "punch",
 				length = new LFloat(true, 233),
 				nodes = new List<TimeLineNode>
-                {
+				{
 					new TimeLineNode
-                    {
+					{
 						time = LFloat.zero,
-						callBack = (p) => view?.PlaySound("Whoosh")
-                    }
-                }
+						parmas = new object[] { "Whoosh" },
+						callBackName = "PlaySound"
+					}
+				}
 			});
 		}
 

@@ -188,6 +188,28 @@ namespace Lockstep.Game{
     }                                                               
 }                                                              
 
+namespace Lockstep.Game{                                                                                               
+    public partial class CTimeLine :IBackup{                                                                  
+       public void WriteBackup(Serializer writer){                                           
+			writer.Write(timeLines);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public void ReadBackup(Deserializer reader){                                       
+			timeLines = reader.ReadList(this.timeLines);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public int GetHash(ref int idx){                                      
+           int hash = 1;                                                                             
+			if(timeLines != null) foreach (var item in timeLines) {if(item != default(Lockstep.Game.TimeLine))hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);}                                                                                     
+           return hash;                                                                                    
+       }                                                                                            
+                                                                                                    
+       public void DumpStr(StringBuilder sb,string prefix){                                       
+			BackUpUtil.DumpList("timeLines", timeLines, sb, prefix);                                                                                     
+       }                                                                                            
+    }                                                               
+}                                                              
+
 namespace Lockstep.Collision2D{                                                                                               
     public partial class CTransform2D :IBackup{                                                                  
        public void WriteBackup(Serializer writer){                                           
@@ -437,14 +459,19 @@ namespace Lockstep.Game{
 			writer.Write(isDead);
 			writer.Write(isGrounded);
 			writer.Write(jumpHeight);
+			writer.Write(jumpKick);
 			writer.Write(jumpTime);
+			writer.Write(jumpTimer);
+			writer.Write(jumping);
 			writer.Write(localId);
 			writer.Write(screenEdgeHorizontal);
 			writer.Write(screenEdgeVertical);
+			writer.Write(stateTimer);
 			writer.Write(walkSpeed);
 			writer.Write((int)(currentDirection));
 			writer.Write((int)(currentState));
 			input.WriteBackup(writer);
+			timeLineCop.WriteBackup(writer);
 			transform.WriteBackup(writer);                                                                                     
        }                                                                                            
                                                                                                     
@@ -455,14 +482,19 @@ namespace Lockstep.Game{
 			isDead = reader.ReadBoolean();
 			isGrounded = reader.ReadBoolean();
 			jumpHeight = reader.ReadLFloat();
+			jumpKick = reader.ReadBoolean();
 			jumpTime = reader.ReadLFloat();
+			jumpTimer = reader.ReadLFloat();
+			jumping = reader.ReadBoolean();
 			localId = reader.ReadInt32();
 			screenEdgeHorizontal = reader.ReadLFloat();
 			screenEdgeVertical = reader.ReadLFloat();
+			stateTimer = reader.ReadLFloat();
 			walkSpeed = reader.ReadLFloat();
 			currentDirection = (Direction)reader.ReadInt32();
 			currentState = (PLAYERSTATE)reader.ReadInt32();
 			input.ReadBackup(reader);
+			timeLineCop.ReadBackup(reader);
 			transform.ReadBackup(reader);                                                                                     
        }                                                                                            
                                                                                                     
@@ -474,14 +506,19 @@ namespace Lockstep.Game{
 			hash += isDead.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += isGrounded.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += jumpHeight.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += jumpKick.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += jumpTime.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += jumpTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += jumping.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += localId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += screenEdgeHorizontal.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += screenEdgeVertical.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += stateTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += walkSpeed.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += ((int)currentDirection) * PrimerLUT.GetPrimer(idx++);
 			hash += ((int)currentState) * PrimerLUT.GetPrimer(idx++);
 			hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += timeLineCop.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
            return hash;                                                                                    
        }                                                                                            
@@ -493,14 +530,19 @@ namespace Lockstep.Game{
 			sb.AppendLine(prefix + "isDead"+":" + isDead.ToString());
 			sb.AppendLine(prefix + "isGrounded"+":" + isGrounded.ToString());
 			sb.AppendLine(prefix + "jumpHeight"+":" + jumpHeight.ToString());
+			sb.AppendLine(prefix + "jumpKick"+":" + jumpKick.ToString());
 			sb.AppendLine(prefix + "jumpTime"+":" + jumpTime.ToString());
+			sb.AppendLine(prefix + "jumpTimer"+":" + jumpTimer.ToString());
+			sb.AppendLine(prefix + "jumping"+":" + jumping.ToString());
 			sb.AppendLine(prefix + "localId"+":" + localId.ToString());
 			sb.AppendLine(prefix + "screenEdgeHorizontal"+":" + screenEdgeHorizontal.ToString());
 			sb.AppendLine(prefix + "screenEdgeVertical"+":" + screenEdgeVertical.ToString());
+			sb.AppendLine(prefix + "stateTimer"+":" + stateTimer.ToString());
 			sb.AppendLine(prefix + "walkSpeed"+":" + walkSpeed.ToString());
 			sb.AppendLine(prefix + "currentDirection"+":" + currentDirection.ToString());
 			sb.AppendLine(prefix + "currentState"+":" + currentState.ToString());
 			sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
+			sb.AppendLine(prefix + "timeLineCop" +":");  timeLineCop.DumpStr(sb,"\t" + prefix);
 			sb.AppendLine(prefix + "transform" +":");  transform.DumpStr(sb,"\t" + prefix);                                                                                     
        }                                                                                            
     }                                                               
@@ -662,6 +704,66 @@ namespace Lockstep.Game{
 			sb.AppendLine(prefix + "prefabId"+":" + prefabId.ToString());
 			sb.AppendLine(prefix + "spawnPoint"+":" + spawnPoint.ToString());
 			sb.AppendLine(prefix + "spawnTime"+":" + spawnTime.ToString());                                                                                     
+       }                                                                                            
+    }                                                               
+}                                                              
+
+namespace Lockstep.Game{                                                                                               
+    public partial class TimeLine :IBackup{                                                                  
+       public void WriteBackup(Serializer writer){                                           
+			writer.Write(length);
+			writer.Write(name);
+			writer.Write(timer);
+			writer.Write(nodes);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public void ReadBackup(Deserializer reader){                                       
+			length = reader.ReadLFloat();
+			name = reader.ReadString();
+			timer = reader.ReadLFloat();
+			nodes = reader.ReadList(this.nodes);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public int GetHash(ref int idx){                                      
+           int hash = 1;                                                                             
+			hash += length.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += name.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			if(nodes != null) foreach (var item in nodes) {if(item != default(Lockstep.Game.TimeLineNode))hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);}                                                                                     
+           return hash;                                                                                    
+       }                                                                                            
+                                                                                                    
+       public void DumpStr(StringBuilder sb,string prefix){                                       
+			sb.AppendLine(prefix + "length"+":" + length.ToString());
+			sb.AppendLine(prefix + "name"+":" + name.ToString());
+			sb.AppendLine(prefix + "timer"+":" + timer.ToString());
+			BackUpUtil.DumpList("nodes", nodes, sb, prefix);                                                                                     
+       }                                                                                            
+    }                                                               
+}                                                              
+
+namespace Lockstep.Game{                                                                                               
+    public partial class TimeLineNode :IBackup{                                                                  
+       public void WriteBackup(Serializer writer){                                           
+			writer.Write(callBackName);
+			writer.Write(time);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public void ReadBackup(Deserializer reader){                                       
+			callBackName = reader.ReadString();
+			time = reader.ReadLFloat();                                                                                     
+       }                                                                                            
+                                                                                                    
+       public int GetHash(ref int idx){                                      
+           int hash = 1;                                                                             
+			hash += callBackName.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += time.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
+           return hash;                                                                                    
+       }                                                                                            
+                                                                                                    
+       public void DumpStr(StringBuilder sb,string prefix){                                       
+			sb.AppendLine(prefix + "callBackName"+":" + callBackName.ToString());
+			sb.AppendLine(prefix + "time"+":" + time.ToString());                                                                                     
        }                                                                                            
     }                                                               
 }                                                              

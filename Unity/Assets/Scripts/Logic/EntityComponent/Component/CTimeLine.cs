@@ -6,23 +6,30 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CTimeLine : Component
+    public partial class CTimeLine : Component, ITimeLineHolder
     {
-        private Dictionary<string, TimeLine> timeLines = new Dictionary<string, TimeLine>();
-        private List<TimeLine> activeTimeLines = new List<TimeLine>();
+        [Backup] private List<TimeLine> timeLines = new List<TimeLine>();
+        private List<string> activeTimeLines = new List<string>();
+        [ReRefBackup] private Dictionary<string, Action<object[]>> callBackDic;
 
         public override void DoUpdate(LFloat deltaTime)
         {
             base.DoUpdate(deltaTime);
 
-            foreach (var timeLine in activeTimeLines)
-                timeLine.Update(deltaTime);
+            foreach (var name in activeTimeLines)
+                GetTimeLine(name)?.Update(deltaTime);
 
             for (int j = activeTimeLines.Count - 1; j >= 0; --j)
             {
-                if (activeTimeLines[j].end)
+                var timeLine = GetTimeLine(activeTimeLines[j]);
+                if (timeLine != null && timeLine.End())
                     activeTimeLines.RemoveAt(j);
             }
+        }
+
+        private TimeLine GetTimeLine(string name)
+        {
+            return timeLines.Find(o => o.name == name);
         }
 
         public void Clear()
@@ -33,32 +40,66 @@ namespace Lockstep.Game
 
         public void AddTimeLine(TimeLine timeLine)
         {
-            if (!timeLines.ContainsKey(timeLine.name))
-                timeLines.Add(timeLine.name, timeLine);
-            else
-                timeLines[timeLine.name] = timeLine;
+            if (GetTimeLine(timeLine.name) == null)
+                timeLines.Add(timeLine);
+            timeLine.SetHolder(this);
         }
 
         public void StartTimeLine(string name)
         {
-            if (timeLines.ContainsKey(name))
+            var timeLine = GetTimeLine(name);
+            if (timeLine != null)
             {
-                var timeLine = timeLines[name];
                 timeLine.Start();
-                if (!activeTimeLines.Contains(timeLine))
-                    activeTimeLines.Add(timeLine);
+                if (!activeTimeLines.Contains(timeLine.name))
+                    activeTimeLines.Add(timeLine.name);
             }
+        }
+
+        public void SetCallBackDic(Dictionary<string, Action<object[]>> dic)
+        {
+            callBackDic = dic;
+        }
+
+        public void ReBindRef()
+        {
+            foreach (var timeLine in timeLines)
+            {
+                timeLine.SetHolder(this);
+            }
+        }
+
+        public Action<object[]> GetCallBack(string name)
+        {
+            if (callBackDic != null && callBackDic.TryGetValue(name, out var callBack))
+                return callBack;
+            return null;
         }
     }
 
-    public class TimeLine
+    public interface ITimeLineHolder
+    {
+        Action<object[]> GetCallBack(string name);
+    }
+
+    public partial class TimeLine : INeedBackup
     {
         public string name;
         public LFloat timer;
         public LFloat length;
         public List<TimeLineNode> nodes;
 
-        public bool end => timer >= length;
+        [ReRefBackup] private ITimeLineHolder timeLineHolder;
+
+        public void SetHolder(ITimeLineHolder holder)
+        {
+            timeLineHolder = holder;
+        }
+
+        public bool End()
+        {
+            return timer >= length;
+        }
 
         public void Start()
         {
@@ -71,16 +112,16 @@ namespace Lockstep.Game
             foreach (var node in nodes)
             {
                 if (node.time >= timer && node.time <= newTime)
-                    node.callBack?.Invoke(node.parmas);
+                    timeLineHolder?.GetCallBack(node.callBackName)?.Invoke(node.parmas);
             }
             timer = newTime;
         }
     }
 
-    public class TimeLineNode
+    public partial class TimeLineNode : INeedBackup
     {
         public LFloat time;
-        public object[] parmas;
-        public Action<object[]> callBack;
+        [NoBackup] public object[] parmas;
+        public string callBackName;
     }
 }
