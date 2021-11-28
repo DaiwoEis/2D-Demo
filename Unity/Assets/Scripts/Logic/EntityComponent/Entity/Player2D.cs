@@ -41,23 +41,39 @@ namespace Lockstep.Game
 
 			view = null;
 			RegisterComponent(timeLineCop);
-			InitTimeLineDic();
+			InitTimeLineRef();
 		}
 
-		private void InitTimeLineDic()
+		private void InitTimeLineRef()
         {
 			var dic = new Dictionary<string, Action<object[]>>
 			{
 				{ "PlaySound", objs => view?.PlaySound(objs[0] as string) },
 			};
 			timeLineCop.SetCallBackDic(dic);
+			timeLineCop.AddNode("punch", new TimeLineNode
+			{
+				time = LFloat.zero,
+				parmas = new object[] { "Whoosh" },
+				callBackName = "PlaySound"
+			});
+			timeLineCop.AddNode("kick", new TimeLineNode
+			{
+				time = new LFloat(true, 50),
+				parmas = new object[] { "Whoosh" },
+				callBackName = "PlaySound"
+			});
+			timeLineCop.AddNode("jump kick", new TimeLineNode
+			{
+				time = LFloat.zero,
+				parmas = new object[] { "Whoosh" },
+				callBackName = "PlaySound"
+			});
 			timeLineCop.ReBindRef();
 		}
 
-        public override void DoAwake()
+		public Player2D() : base()
         {
-            base.DoAwake();
-
 			InitTimeLineData();
 		}
 
@@ -67,16 +83,17 @@ namespace Lockstep.Game
 			timeLineCop.AddTimeLine(new TimeLine
 			{
 				name = "punch",
-				length = new LFloat(true, 233),
-				nodes = new List<TimeLineNode>
-				{
-					new TimeLineNode
-					{
-						time = LFloat.zero,
-						parmas = new object[] { "Whoosh" },
-						callBackName = "PlaySound"
-					}
-				}
+				length = new LFloat(true, 233)
+			});
+			timeLineCop.AddTimeLine(new TimeLine
+			{
+				name = "kick",
+				length = new LFloat(true, 350)
+			});
+			timeLineCop.AddTimeLine(new TimeLine
+			{
+				name = "jump kick",
+				length = new LFloat(true, 517)
 			});
 		}
 
@@ -118,6 +135,7 @@ namespace Lockstep.Game
             }
 			else if (state == PLAYERSTATE.KICK)
 			{
+				timeLineCop.StartTimeLine("kick");
 				view?.PlayAnim("Kick");
 			}
 			else if (state == PLAYERSTATE.DEFENDING)
@@ -202,6 +220,7 @@ namespace Lockstep.Game
 			if (!jumpKick && (input.kick || input.punch))
             {
 				jumpKick = true;
+				timeLineCop.StartTimeLine("jump kick");
 				view?.PlayAnim("JumpKick");
             }
         }

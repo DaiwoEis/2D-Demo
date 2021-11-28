@@ -9,22 +9,29 @@ namespace Lockstep.Game
     public partial class CTimeLine : Component, ITimeLineHolder
     {
         [Backup] private List<TimeLine> timeLines = new List<TimeLine>();
-        private List<string> activeTimeLines = new List<string>();
+        private List<string> endTimeLines = new List<string>();
         [ReRefBackup] private Dictionary<string, Action<object[]>> callBackDic;
 
         public override void DoUpdate(LFloat deltaTime)
         {
             base.DoUpdate(deltaTime);
 
-            foreach (var name in activeTimeLines)
-                GetTimeLine(name)?.Update(deltaTime);
-
-            for (int j = activeTimeLines.Count - 1; j >= 0; --j)
+            endTimeLines.Clear();
+            foreach (var timeLine in timeLines)
             {
-                var timeLine = GetTimeLine(activeTimeLines[j]);
-                if (timeLine != null && timeLine.End())
-                    activeTimeLines.RemoveAt(j);
+                if (timeLine != null && timeLine.IsStart())
+                {
+                    timeLine.Update(deltaTime);
+                    if (timeLine.IsEnd())
+                        endTimeLines.Add(timeLine.name);
+                }
             }
+            for (int j = endTimeLines.Count - 1; j >= 0; --j)
+            {
+                var timeLine = GetTimeLine(endTimeLines[j]);
+                timeLine?.End();
+            }
+            endTimeLines.Clear();
         }
 
         private TimeLine GetTimeLine(string name)
@@ -34,7 +41,7 @@ namespace Lockstep.Game
 
         public void Clear()
         {
-            activeTimeLines.Clear();
+            endTimeLines.Clear();
             timeLines.Clear();
         }
 
@@ -42,7 +49,13 @@ namespace Lockstep.Game
         {
             if (GetTimeLine(timeLine.name) == null)
                 timeLines.Add(timeLine);
-            timeLine.SetHolder(this);
+        }
+
+        public void AddNode(string name, TimeLineNode node)
+        {
+            var timeLine = GetTimeLine(name);
+            if (timeLine != null)
+                timeLine.nodes.Add(node);
         }
 
         public void StartTimeLine(string name)
@@ -51,8 +64,6 @@ namespace Lockstep.Game
             if (timeLine != null)
             {
                 timeLine.Start();
-                if (!activeTimeLines.Contains(timeLine.name))
-                    activeTimeLines.Add(timeLine.name);
             }
         }
 
@@ -82,13 +93,14 @@ namespace Lockstep.Game
         Action<object[]> GetCallBack(string name);
     }
 
+    [Serializable]
     public partial class TimeLine : INeedBackup
     {
         public string name;
         public LFloat timer;
         public LFloat length;
-        public List<TimeLineNode> nodes;
-
+        public bool start;
+        [NoBackup] public List<TimeLineNode> nodes = new List<TimeLineNode>();
         [ReRefBackup] private ITimeLineHolder timeLineHolder;
 
         public void SetHolder(ITimeLineHolder holder)
@@ -96,14 +108,25 @@ namespace Lockstep.Game
             timeLineHolder = holder;
         }
 
-        public bool End()
+        public bool IsEnd()
         {
             return timer >= length;
+        }
+
+        public void End()
+        {
+            start = false; 
+        }
+
+        public bool IsStart()
+        {
+            return start;
         }
 
         public void Start()
         {
             timer = LFloat.zero;
+            start = true;
         }
 
         public void Update(LFloat deltaTime)
@@ -118,10 +141,10 @@ namespace Lockstep.Game
         }
     }
 
-    public partial class TimeLineNode : INeedBackup
+    public partial class TimeLineNode
     {
         public LFloat time;
-        [NoBackup] public object[] parmas;
+        public object[] parmas;
         public string callBackName;
     }
 }

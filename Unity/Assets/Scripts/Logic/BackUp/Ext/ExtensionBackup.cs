@@ -713,57 +713,31 @@ namespace Lockstep.Game{
        public void WriteBackup(Serializer writer){                                           
 			writer.Write(length);
 			writer.Write(name);
-			writer.Write(timer);
-			writer.Write(nodes);                                                                                     
+			writer.Write(start);
+			writer.Write(timer);                                                                                     
        }                                                                                            
                                                                                                     
        public void ReadBackup(Deserializer reader){                                       
 			length = reader.ReadLFloat();
 			name = reader.ReadString();
-			timer = reader.ReadLFloat();
-			nodes = reader.ReadList(this.nodes);                                                                                     
+			start = reader.ReadBoolean();
+			timer = reader.ReadLFloat();                                                                                     
        }                                                                                            
                                                                                                     
        public int GetHash(ref int idx){                                      
            int hash = 1;                                                                             
 			hash += length.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += name.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			if(nodes != null) foreach (var item in nodes) {if(item != default(Lockstep.Game.TimeLineNode))hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);}                                                                                     
+			hash += start.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
            return hash;                                                                                    
        }                                                                                            
                                                                                                     
        public void DumpStr(StringBuilder sb,string prefix){                                       
 			sb.AppendLine(prefix + "length"+":" + length.ToString());
 			sb.AppendLine(prefix + "name"+":" + name.ToString());
-			sb.AppendLine(prefix + "timer"+":" + timer.ToString());
-			BackUpUtil.DumpList("nodes", nodes, sb, prefix);                                                                                     
-       }                                                                                            
-    }                                                               
-}                                                              
-
-namespace Lockstep.Game{                                                                                               
-    public partial class TimeLineNode :IBackup{                                                                  
-       public void WriteBackup(Serializer writer){                                           
-			writer.Write(callBackName);
-			writer.Write(time);                                                                                     
-       }                                                                                            
-                                                                                                    
-       public void ReadBackup(Deserializer reader){                                       
-			callBackName = reader.ReadString();
-			time = reader.ReadLFloat();                                                                                     
-       }                                                                                            
-                                                                                                    
-       public int GetHash(ref int idx){                                      
-           int hash = 1;                                                                             
-			hash += callBackName.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += time.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
-           return hash;                                                                                    
-       }                                                                                            
-                                                                                                    
-       public void DumpStr(StringBuilder sb,string prefix){                                       
-			sb.AppendLine(prefix + "callBackName"+":" + callBackName.ToString());
-			sb.AppendLine(prefix + "time"+":" + time.ToString());                                                                                     
+			sb.AppendLine(prefix + "start"+":" + start.ToString());
+			sb.AppendLine(prefix + "timer"+":" + timer.ToString());                                                                                     
        }                                                                                            
     }                                                               
 }                                                              
