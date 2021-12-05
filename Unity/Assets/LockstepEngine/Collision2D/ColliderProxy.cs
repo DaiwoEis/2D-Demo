@@ -71,6 +71,10 @@ namespace Lockstep.Collision2D {
             }
         }
 
+        public void SetBound(LRect bound)
+        {
+            _bound = bound;
+        }
 
         public bool IsMoved = true;
 
@@ -98,9 +102,8 @@ namespace Lockstep.Collision2D {
             }
         }
 
-
         public LRect GetBounds(){
-            return new LRect(_bound.position + pos, _bound.size);
+            return new LRect(_bound.position + pos + new LVector2(LFloat.zero, Transform2D.y), _bound.size);
         }
 
         public virtual void OnLPTriggerEnter(ColliderProxy other){ }

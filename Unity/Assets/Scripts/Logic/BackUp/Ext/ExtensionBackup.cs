@@ -91,6 +91,28 @@ namespace Lockstep.Game{
 }                                                              
 
 namespace Lockstep.Game{                                                                                               
+    public partial class CCollider :IBackup{                                                                  
+       public void WriteBackup(Serializer writer){                                           
+			writer.Write(colliderProxyId);                                                                                     
+       }                                                                                            
+                                                                                                    
+       public void ReadBackup(Deserializer reader){                                       
+			colliderProxyId = reader.ReadInt32();                                                                                     
+       }                                                                                            
+                                                                                                    
+       public int GetHash(ref int idx){                                      
+           int hash = 1;                                                                             
+			hash += colliderProxyId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
+           return hash;                                                                                    
+       }                                                                                            
+                                                                                                    
+       public void DumpStr(StringBuilder sb,string prefix){                                       
+			sb.AppendLine(prefix + "colliderProxyId"+":" + colliderProxyId.ToString());                                                                                     
+       }                                                                                            
+    }                                                               
+}                                                              
+
+namespace Lockstep.Game{                                                                                               
     public partial class CMover :IBackup{                                                                  
        public void WriteBackup(Serializer writer){                                           
 			writer.Write(hasReachTarget);
@@ -470,6 +492,8 @@ namespace Lockstep.Game{
 			writer.Write(walkSpeed);
 			writer.Write((int)(currentDirection));
 			writer.Write((int)(currentState));
+			attackCollider.WriteBackup(writer);
+			hitCollider.WriteBackup(writer);
 			input.WriteBackup(writer);
 			timeLineCop.WriteBackup(writer);
 			transform.WriteBackup(writer);                                                                                     
@@ -493,6 +517,8 @@ namespace Lockstep.Game{
 			walkSpeed = reader.ReadLFloat();
 			currentDirection = (Direction)reader.ReadInt32();
 			currentState = (PLAYERSTATE)reader.ReadInt32();
+			attackCollider.ReadBackup(reader);
+			hitCollider.ReadBackup(reader);
 			input.ReadBackup(reader);
 			timeLineCop.ReadBackup(reader);
 			transform.ReadBackup(reader);                                                                                     
@@ -517,6 +543,8 @@ namespace Lockstep.Game{
 			hash += walkSpeed.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += ((int)currentDirection) * PrimerLUT.GetPrimer(idx++);
 			hash += ((int)currentState) * PrimerLUT.GetPrimer(idx++);
+			hash += attackCollider.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+			hash += hitCollider.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += timeLineCop.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
 			hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
@@ -541,6 +569,8 @@ namespace Lockstep.Game{
 			sb.AppendLine(prefix + "walkSpeed"+":" + walkSpeed.ToString());
 			sb.AppendLine(prefix + "currentDirection"+":" + currentDirection.ToString());
 			sb.AppendLine(prefix + "currentState"+":" + currentState.ToString());
+			sb.AppendLine(prefix + "attackCollider" +":");  attackCollider.DumpStr(sb,"\t" + prefix);
+			sb.AppendLine(prefix + "hitCollider" +":");  hitCollider.DumpStr(sb,"\t" + prefix);
 			sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
 			sb.AppendLine(prefix + "timeLineCop" +":");  timeLineCop.DumpStr(sb,"\t" + prefix);
 			sb.AppendLine(prefix + "transform" +":");  transform.DumpStr(sb,"\t" + prefix);                                                                                     

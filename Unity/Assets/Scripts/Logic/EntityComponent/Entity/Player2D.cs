@@ -2,6 +2,7 @@
 using Lockstep.Math;
 using UnityEngine;
 using System.Collections.Generic;
+using Lockstep.UnsafeCollision2D;
 
 namespace Lockstep.Game
 {
@@ -35,13 +36,32 @@ namespace Lockstep.Game
 
 		[ReRefBackup] public IPlayer2DView view;
 
-        protected override void BindRef()
+		public CCollider attackCollider = new CCollider();
+		public CCollider hitCollider = new CCollider();
+
+		protected override void BindRef()
         {
             base.BindRef();
 
 			view = null;
 			RegisterComponent(timeLineCop);
+			RegisterComponent(attackCollider);
+			RegisterComponent(hitCollider);
 			InitTimeLineRef();
+			InitCollider();
+			PhysicSystem.Instance.RebindCollider(attackCollider);
+			PhysicSystem.Instance.RebindCollider(hitCollider);
+		}
+
+        private void InitCollider()
+        {
+			attackCollider.layer = 0;
+			attackCollider.handler = this;
+			attackCollider.type = CCollider.Type.Attack;
+
+			hitCollider.layer = 0;
+			hitCollider.handler = this;
+			hitCollider.type = CCollider.Type.Hit;
 		}
 
 		private void InitTimeLineRef()
@@ -49,6 +69,16 @@ namespace Lockstep.Game
 			var dic = new Dictionary<string, Action<object[]>>
 			{
 				{ "PlaySound", objs => view?.PlaySound(objs[0] as string) },
+				{ "UpdateCollider", objs => 
+				{
+					var attack = (int) objs[0];
+					var center = (LVector2) objs[1];
+					var size = (LVector2) objs[2];
+					if (attack == 1)
+						attackCollider.SetBound(new LRect(center, size));
+					else
+						hitCollider.SetBound(new LRect(center, size));
+				} }
 			};
 			timeLineCop.SetCallBackDic(dic);
 			timeLineCop.AddNode("punch", new TimeLineNode
@@ -56,6 +86,17 @@ namespace Lockstep.Game
 				time = LFloat.zero,
 				parmas = new object[] { "Whoosh" },
 				callBackName = "PlaySound"
+			});
+			timeLineCop.AddNode("punch", new TimeLineNode
+			{
+				time = new LFloat(true, 16),
+				parmas = new object[] 
+				{ 
+					1, 
+					new LVector2(new LFloat(true, 1300), new LFloat(true, 1300)), 
+					new LVector2(new LFloat(true, 700), new LFloat(true, 350)) 
+				},
+				callBackName = "UpdateCollider"
 			});
 			timeLineCop.AddNode("kick", new TimeLineNode
 			{
@@ -109,6 +150,8 @@ namespace Lockstep.Game
         {
             base.DoUpdate(deltaTime);
 
+			attackCollider.ClearBound();
+			hitCollider.ClearBound();
 			inputDirection = input.inputUV;
 			OnStateUpdate(currentState, deltaTime);
 		}
@@ -314,6 +357,8 @@ namespace Lockstep.Game
 		public void Death()
 		{
 			isDead = true;
+			PhysicSystem.Instance.RemoveCollider(attackCollider);
+			PhysicSystem.Instance.RemoveCollider(hitCollider);
 		}
 
 		public bool PlayerIsGrounded()

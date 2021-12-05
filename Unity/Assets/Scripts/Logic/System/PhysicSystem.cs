@@ -28,6 +28,9 @@ namespace Lockstep.Game {
         static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono =
             new Dictionary<ColliderProxy, ILPTriggerEventHandler>();
 
+        static Dictionary<int, CCollider> _colProxy2MonoNew =
+            new Dictionary<int, CCollider>();
+
         public bool[] collisionMatrix => config.collisionMatrix;
         public LVector3 pos => config.pos;
         public LFloat worldSize => config.worldSize;
@@ -76,6 +79,16 @@ namespace Lockstep.Game {
 
             if (_colProxy2Mono.TryGetValue(b, out var handlerb)) {
                 CollisionSystem.TriggerEvent(handlerb, a, type);
+            }
+
+            if (_colProxy2MonoNew.TryGetValue(a.Id, out var colliderB))
+            {
+                CollisionSystem.TriggerEvent(colliderB.handler, b, type);
+            }
+
+            if (_colProxy2MonoNew.TryGetValue(b.Id, out var colliderA))
+            {
+                CollisionSystem.TriggerEvent(colliderA.handler, a, type);
             }
         }
 
@@ -170,6 +183,32 @@ namespace Lockstep.Game {
 
         void OnDrawGizmos(){
             collisionSystem?.DrawGizmos();
+        }
+
+        public void RegisterCollider(CCollider collider)
+        {
+            var proxy = new ColliderProxy();
+            proxy.EntityObject = collider.baseEntity;
+            proxy.Transform2D = collider.baseEntity.transform;
+            proxy.IsStatic = false;
+            proxy.LayerType = collider.layer;
+            proxy.SetBound(collider.GetBound());
+            _colProxy2MonoNew[proxy.Id] = collider;
+            collisionSystem.AddCollider(proxy);
+        }
+
+        public void RemoveCollider(CCollider collider)
+        {
+            var proxy = GetCollider(collider.colliderProxyId);
+            if (proxy != null)
+                collisionSystem.RemoveCollider(proxy);
+            _colProxy2MonoNew.Remove(collider.colliderProxyId);
+        }
+
+        public void RebindCollider(CCollider collider)
+        {
+            RemoveCollider(collider);
+            RegisterCollider(collider);
         }
     }
 }
