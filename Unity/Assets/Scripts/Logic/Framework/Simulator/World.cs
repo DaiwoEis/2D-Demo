@@ -17,7 +17,7 @@ namespace Lockstep.Game {
         public PlayerInput[] PlayerInputs => _gameStateService.GetPlayers().Select(a => a.input).ToArray();
         public PlayerInput[] PlayerInput2Ds => _gameStateService.GetPlayer2Ds().Select(a => a.input).ToArray();
 
-        public static Player MyPlayer;
+        public static BaseEntity MyPlayer;
         public static object MyPlayerTrans => MyPlayer?.engineTransform;
         private List<BaseSystem> _systems = new List<BaseSystem>();
         private bool _hasStart = false;
@@ -74,19 +74,24 @@ namespace Lockstep.Game {
             Debug.TraceSavePath = _traceLogPath;
 
             _debugService.Trace("CreatePlayer " + playerCount);
-            //create Players 
+            var config = _gameConfigService.GetWorldConfig();
+            var initPos = LVector2.zero; 
             for (int i = 0; i < playerCount; i++) {
-                var PrefabId = 0; //TODO
-                var initPos = LVector2.zero; //TODO
-                var player = _gameStateService.CreateEntity<Player>(PrefabId, initPos);
-                player.localId = i;
-                var player2D = _gameStateService.CreateEntity<Player2D>(1000, initPos);
-                player2D.localId = i;
+                if (config.playerPrefabId >= 0)
+                {
+                    var player = _gameStateService.CreateEntity<Player>(config.playerPrefabId, initPos);
+                    player.localId = i;
+                }
+                if (config.player2DPrefabId >= 0)
+                {
+                    var player2D = _gameStateService.CreateEntity<Player2D>(1000, initPos);
+                    player2D.localId = i;
+                }
             }
 
-            var allPlayers = _gameStateService.GetPlayers();
-
-            MyPlayer = allPlayers[localPlayerId];
+            BaseEntity[] allPlayers = _gameStateService.GetPlayers();
+            if (localPlayerId < allPlayers.Length - 1)
+                MyPlayer = allPlayers[localPlayerId];
         }
 
         public override void DoDestroy(){

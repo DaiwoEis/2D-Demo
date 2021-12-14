@@ -111,45 +111,59 @@ namespace Lockstep.Game {
         public int showTreeId = 0;
     }
 
+    [Serializable]
+    public class WorldConfig
+    {
+        public int playerPrefabId;
+        public int player2DPrefabId;
+        public List<int> spawnerIds = new List<int>();
+    }
+
 
     [CreateAssetMenu(menuName = "GameConfig")]
     public class GameConfig : ScriptableObject {
+        public WorldConfig worldConfig;
         public List<PlayerConfig> player = new List<PlayerConfig>();
         public List<Player2DConfig> player2D = new List<Player2DConfig>();
         public List<EnemyConfig> enemies = new List<EnemyConfig>();
         public List<SpawnerConfig> spawner = new List<SpawnerConfig>();
         public List<AnimatorConfig> animators = new List<AnimatorConfig>();
         public List<SkillBoxConfig> skills = new List<SkillBoxConfig>();
-        public void DoAwake(){
-            foreach (var skill in skills) {
+        public CollisionConfig CollisionConfig;
+        public string RecorderFilePath;
+        public string DumpStrPath;
+        public Msg_G2C_GameStartInfo ClientModeInfo = new Msg_G2C_GameStartInfo();
+
+        public void DoAwake()
+        {
+            foreach (var skill in skills)
+            {
                 skill.CheckInit();
             }
         }
-        private T GetConfig<T>(List<T> lst, int id) where T: EntityConfig{
-            if (id < 0 || id >= lst.Count) {
-                Debug.LogError("Miss " + typeof(T)  + " "+ id);
+        private T GetConfig<T>(List<T> lst, int id) where T : EntityConfig
+        {
+            if (id < 0 || id >= lst.Count)
+            {
+                Debug.LogError("Miss " + typeof(T) + " " + id);
                 return null;
             }
             return lst[id];
         }
 
-        public EntityConfig GetEnemyConfig(int id){return  GetConfig(enemies, id);}
-        public EntityConfig GetPlayerConfig(int id){return  GetConfig(player, id);}
-        public EntityConfig GetPlayer2DConfig(int id){return  GetConfig(player2D, id); }
-        public EntityConfig GetSpawnerConfig(int id){return  GetConfig(spawner, id);}
+        public EntityConfig GetEnemyConfig(int id) { return GetConfig(enemies, id); }
+        public EntityConfig GetPlayerConfig(int id) { return GetConfig(player, id); }
+        public EntityConfig GetPlayer2DConfig(int id) { return GetConfig(player2D, id); }
+        public EntityConfig GetSpawnerConfig(int id) { return GetConfig(spawner, id); }
 
-     
-
-        public AnimatorConfig GetAnimatorConfig(int id){
-            return (id < 0 ||id >= animators.Count) ? null : animators[id];
+        public AnimatorConfig GetAnimatorConfig(int id)
+        {
+            return (id < 0 || id >= animators.Count) ? null : animators[id];
         }
 
-        public SkillBoxConfig GetSkillConfig(int id){
-            return (id < 0 ||id >= skills.Count) ? null : skills[id];
+        public SkillBoxConfig GetSkillConfig(int id)
+        {
+            return (id < 0 || id >= skills.Count) ? null : skills[id];
         }
-        public CollisionConfig CollisionConfig;
-        public string RecorderFilePath;
-        public string DumpStrPath;
-        public Msg_G2C_GameStartInfo ClientModeInfo = new Msg_G2C_GameStartInfo();
     }
 }
