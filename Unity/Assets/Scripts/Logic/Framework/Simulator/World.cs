@@ -84,7 +84,7 @@ namespace Lockstep.Game {
                 }
                 if (config.player2DPrefabId >= 0)
                 {
-                    var player2D = _gameStateService.CreateEntity<Player2D>(1000, initPos);
+                    var player2D = _gameStateService.CreateEntity<Player2D>(config.player2DPrefabId, initPos);
                     player2D.localId = i;
                 }
             }

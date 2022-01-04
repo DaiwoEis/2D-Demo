@@ -7,6 +7,7 @@ using NetMsg.Common;
 namespace Lockstep.Game {
     public interface IGameConfigService : IService {
         EntityConfig GetEntityConfig(int id);
+        T GetEntityConfig<T>(int id) where T : EntityConfig;
         AnimatorConfig GetAnimatorConfig(int id);
         SkillBoxConfig GetSkillConfig(int id);
 

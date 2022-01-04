@@ -11,7 +11,7 @@ namespace Lockstep.Game
         {
             foreach (var configId in _gameConfigService.GetWorldConfig().spawnerIds)
             {
-                var config = _gameConfigService.GetEntityConfig(configId) as SpawnerConfig;
+                var config = _gameConfigService.GetEntityConfig<SpawnerConfig>(configId);
                 _gameStateService.CreateEntity<Spawner>(configId, config.entity.Info.spawnPoint);
             }
 
